@@ -1,4 +1,4 @@
-package org.iesharia.composeroomapp
+package org.iesharia.composeroomapp.view
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -10,6 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.collectLatest
+import org.iesharia.composeroomapp.data.AppDatabase
+import org.iesharia.composeroomapp.data.Task
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -23,7 +25,6 @@ fun TaskApp(database: AppDatabase) {
     // Estado para el nombre de la nueva tarea
     var newTaskName by remember { mutableStateOf("") }
 
-    // Observa los cambios en la base de datos usando Flow
     LaunchedEffect(taskDao) {
         taskDao.getAllTasks().collectLatest { taskList ->
             tasks = taskList
@@ -45,7 +46,7 @@ fun TaskApp(database: AppDatabase) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Campo de texto para agregar una nueva tarea
+            // Agregar nueva tarea
             OutlinedTextField(
                 value = newTaskName,
                 onValueChange = { newTaskName = it },
@@ -53,7 +54,6 @@ fun TaskApp(database: AppDatabase) {
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Botón para agregar tarea
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = {
@@ -61,7 +61,7 @@ fun TaskApp(database: AppDatabase) {
                         coroutineScope.launch {
                             val newTask = Task(name = newTaskName)
                             taskDao.insert(newTask)
-                            newTaskName = "" // Limpiar el campo de texto
+                            newTaskName = ""
                         }
                     }
                 },

@@ -1,4 +1,4 @@
-package org.iesharia.composeroomapp
+package org.iesharia.composeroomapp.data
 
 import android.content.Context
 import androidx.room.Database

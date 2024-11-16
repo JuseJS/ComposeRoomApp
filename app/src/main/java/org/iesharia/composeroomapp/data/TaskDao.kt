@@ -1,4 +1,4 @@
-package org.iesharia.composeroomapp
+package org.iesharia.composeroomapp.data
 
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
