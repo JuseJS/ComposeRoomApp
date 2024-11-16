@@ -9,27 +9,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.flow.collectLatest
-import org.iesharia.composeroomapp.data.AppDatabase
 import org.iesharia.composeroomapp.data.Task
+import org.iesharia.composeroomapp.viewmodel.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskApp(database: AppDatabase) {
-    val taskDao = database.taskDao()
-    val coroutineScope = rememberCoroutineScope()
+fun TaskApp(viewModel: TaskViewModel) {
+    val tasks by viewModel.tasks.collectAsState()
 
-    // Estado para la lista de tareas
-    var tasks by remember { mutableStateOf(emptyList<Task>()) }
-
-    // Estado para el nombre de la nueva tarea
     var newTaskName by remember { mutableStateOf("") }
-
-    LaunchedEffect(taskDao) {
-        taskDao.getAllTasks().collectLatest { taskList ->
-            tasks = taskList
-        }
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -46,7 +35,6 @@ fun TaskApp(database: AppDatabase) {
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Agregar nueva tarea
             OutlinedTextField(
                 value = newTaskName,
                 onValueChange = { newTaskName = it },
@@ -59,8 +47,7 @@ fun TaskApp(database: AppDatabase) {
                 onClick = {
                     if (newTaskName.isNotBlank()) {
                         coroutineScope.launch {
-                            val newTask = Task(name = newTaskName)
-                            taskDao.insert(newTask)
+                            viewModel.addTask(Task(name = newTaskName))
                             newTaskName = ""
                         }
                     }
@@ -72,11 +59,7 @@ fun TaskApp(database: AppDatabase) {
 
             Spacer(modifier = Modifier.height(16.dp))
             tasks.forEach { task ->
-                TaskItem(task = task, onDelete = {
-                    coroutineScope.launch {
-                        taskDao.delete(task.id)
-                    }
-                })
+                TaskItem(task = task, onDelete = { viewModel.deleteTask(task.id) })
             }
         }
     }
